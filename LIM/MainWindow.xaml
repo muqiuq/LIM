@@ -4,13 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LIM"
+        xmlns:engines="clr-namespace:LIM.Engines"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="400">
-    <Grid>
-        <Label Content="User" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="Mode" HorizontalAlignment="Left" Margin="10,41,0,0" VerticalAlignment="Top"/>
-        <Button Content="Inventory List" HorizontalAlignment="Left" Margin="10,97,0,0" VerticalAlignment="Top" Click="InventoryList_Click"/>
-        <Button Content="Settings" HorizontalAlignment="Left" Margin="265,97,0,0" VerticalAlignment="Top" Click="Button_Click_Settings"/>
+        Title="LIM" Height="232" Width="400" ResizeMode="NoResize">
+    <Grid x:Name="MainGrid">
+        <Label Content="User:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20"/>
+        <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" FontSize="20"/>
+        <Button Content="Inventory List" HorizontalAlignment="Left" Margin="10,114,0,0" VerticalAlignment="Top" Click="InventoryList_Click" Height="42" Width="371"/>
+        <Button Content="Settings" HorizontalAlignment="Left" Margin="10,161,0,0" VerticalAlignment="Top" Click="Button_Click_Settings"/>
+        <ComboBox HorizontalAlignment="Left" Margin="123,54,0,0" VerticalAlignment="Top" Width="247"
+                  ItemsSource="{Binding Path=AppStates}"
+                  SelectedItem="{Binding Path=State, Mode=TwoWay}" FontSize="20"/>
+        <Label x:Name="UserLabel" Content="{Binding Path=ActiveUser, Mode=TwoWay}" HorizontalAlignment="Left" Margin="123,10,0,0" VerticalAlignment="Top" Width="247" FontSize="20" Height="36"/>
 
     </Grid>
 </Window>

@@ -237,7 +237,7 @@ namespace LIM.EntityServices
 
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return Items.Select(x => new KeyValuePair<string, T>(x.Entity.Id, x.Entity)).GetEnumerator();
         }
 
         #endregion

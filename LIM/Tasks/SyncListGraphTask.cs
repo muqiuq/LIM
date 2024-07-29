@@ -59,10 +59,11 @@ namespace LIM.Tasks
             }
             catch (Exception ex)
             {
-                //if (Debugger.IsAttached)
-                //{
-                //    throw ex;
-                //}
+                if (Debugger.IsAttached)
+                {
+                    throw ex;
+                }
+                Debug.WriteLine(ex);
                 //logger.LogError($"CleanUpTask {ex.Message}", ex);
             }
             isRunning = false;

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LIM.Engines;
 
 namespace LIM
 {
@@ -18,11 +19,11 @@ namespace LIM
 
         public static IConfigurationRoot AppConfig { get; set; }
 
-        public static EntityManager<InventoryItem> InventoryItems { get; set; }
         public static SyncListGraphTask SyncListGraphTask { get; internal set; }
 
         public static LimSettings UserSettings { get; set; }
-
-        public static BarcodeScannerService BarcodeScannerService { get; set; }
+       
+        public static LimAppContext LimAppContext { get; set; }
+        public static AppLogicLinker AppLogicLinker { get; set; }
     }
 }

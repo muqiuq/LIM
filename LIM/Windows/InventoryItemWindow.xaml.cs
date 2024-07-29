@@ -23,17 +23,22 @@ namespace LIM.Windows
     public partial class InventoryItemWindow : Window
     {
         public InventoryItem InventoryItem;
+        private readonly LimAppContext appContext;
 
         public EntityManager<InventoryItem> InventoryItems { get; }
 
-        public InventoryItemWindow(InventoryItem inventoryItem, EntityManager<InventoryItem> inventoryItems)
+        public InventoryItemWindow(InventoryItem inventoryItem, LimAppContext appContext)
         {
             InitializeComponent();
             InventoryItem = inventoryItem;
-            InventoryItems = inventoryItems;
+            this.appContext = appContext;
+            InventoryItems = appContext.InventoryItems;
             productGrid.DataContext = inventoryItem;
             stockContentBox.Text = InventoryItem.ActualInventory.ToString();
+            LastFocused = DateTime.Now;
         }
+
+        public DateTime LastFocused { get; private set; }
 
         private void Button_Link_Click(object sender, RoutedEventArgs e)
         {
@@ -56,7 +61,12 @@ namespace LIM.Windows
 
         private void cmdUp_Click(object sender, RoutedEventArgs e)
         {
-            InventoryItem.ActualInventory += 1;
+            AddOrRemove(1);
+        }
+
+        public void AddOrRemove(decimal amount = 0)
+        {
+            InventoryItem.ActualInventory += amount;
             UpdateStockContentBox();
         }
 
@@ -67,8 +77,7 @@ namespace LIM.Windows
 
         private void cmdDown_Click(object sender, RoutedEventArgs e)
         {
-            InventoryItem.ActualInventory -= 1;
-            UpdateStockContentBox();
+            AddOrRemove(-1);
         }
 
         private void stockContentBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -88,6 +97,35 @@ namespace LIM.Windows
             {
                 InventoryItem.ActualInventory = parsedCurrentTextBoxValue;
             }
+        }
+
+        private void Button_Click_AddEAN(object sender, RoutedEventArgs e)
+        {
+            var barcodeScanWindow = new BarcodeScanWindow(appContext);
+            barcodeScanWindow.ShowDialog();
+            if (!barcodeScanWindow.Success) return;
+            if (InventoryItem.EANs.Contains(barcodeScanWindow.Barcode)) return;
+            InventoryItem.EANs.Add(barcodeScanWindow.Barcode);
+            eanContentBox.GetBindingExpression(ListBox.ItemsSourceProperty).UpdateTarget();
+        }
+
+        private void eanContentBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                if (eanContentBox.SelectedItem == null) return;
+                InventoryItem.EANs.Remove((string)eanContentBox.SelectedItem);
+            }
+        }
+
+        private void Window_GotFocus(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            LastFocused = DateTime.Now;
         }
     }
 }

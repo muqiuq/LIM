@@ -8,6 +8,8 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.Windows;
+using LIM.Engines;
+using LIM.Windows.Helpers;
 
 namespace LIM
 {
@@ -22,12 +24,22 @@ namespace LIM
             GlobalState.UserSettings = LimSettings.TryLoadFromFileOrNew();
             var graphService = new ListGraphService(GlobalState.AppConfig, GlobalState.UserSettings);
 
-            GlobalState.InventoryItems = new EntityManager<InventoryItem>(GlobalState.UserSettings.ListName, GlobalState.InventoryItemFileName);
-            GlobalState.InventoryItems.TryLoad();
-            GlobalState.SyncListGraphTask = new SyncListGraphTask(graphService, GlobalState.InventoryItems);
+            var inventoryItemEntityManager = new EntityManager<InventoryItem>(GlobalState.UserSettings.ListName, GlobalState.InventoryItemFileName);
+            inventoryItemEntityManager.TryLoad();
+            GlobalState.SyncListGraphTask = new SyncListGraphTask(graphService, inventoryItemEntityManager);
             GlobalState.SyncListGraphTask.StartAsync(new CancellationToken());
-            GlobalState.BarcodeScannerService = new BarcodeScanner.BarcodeScannerService(GlobalState.UserSettings);
-            GlobalState.BarcodeScannerService.ReStart();
+
+            GlobalState.LimAppContext = new LimAppContext()
+            {
+                BarcodeScannerService = new BarcodeScanner.BarcodeScannerService(GlobalState.UserSettings),
+                WindowManager = new WindowManager(),
+                InventoryItems = inventoryItemEntityManager,
+                AppStateEngine = new AppStateManager()
+            };
+
+            GlobalState.AppLogicLinker = new AppLogicLinker(GlobalState.LimAppContext);
+
+            GlobalState.LimAppContext.BarcodeScannerService.ReStart();
             base.OnStartup(e);
         }
 

@@ -7,6 +7,7 @@ using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -32,6 +33,16 @@ namespace LIM.EntityServices
         public LimSettings UserSettings { get; }
 
         public string SiteId { get; private set; }
+
+        public object NormalizeValue(object inValue)
+        {
+            object value = inValue;
+            if (inValue is IEnumerable<string>)
+            {
+                value = string.Join("\n", ((IEnumerable<string>)inValue));
+            }
+            return value;
+        }
 
         public async Task<int> UploadLocalChanges<T>(EntityManager<T> manager) where T : IEntity, new()
         {
@@ -62,7 +73,15 @@ namespace LIM.EntityServices
                         {
                             if (!property.GetValue(item).Equals(graphFieldValue))
                             {
-                                fieldsToUpdate[attribute.Name] = property.GetValue(item);
+                                fieldsToUpdate[attribute.Name] = NormalizeValue(property.GetValue(item));
+                            }
+                        }
+                        else if(property.Name != "Id")
+                        {
+                            var value = property.GetValue(item);
+                            if (value != null)
+                            {
+                                fieldsToUpdate[attribute.Name] = NormalizeValue(value);
                             }
                         }
                     }
@@ -133,6 +152,10 @@ namespace LIM.EntityServices
                             else if (propertyType == typeof(List<string>))
                             {
                                 property.SetValue(item, (value as string)?.Split("\n").ToList());
+                            }
+                            else if (propertyType == typeof(ObservableCollection<string>))
+                            {
+                                property.SetValue(item, new ObservableCollection<string>((value as string)?.Split("\n").ToList()));
                             }
                             else
                             {

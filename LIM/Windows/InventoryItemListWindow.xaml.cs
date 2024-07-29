@@ -22,12 +22,14 @@ namespace LIM.Windows
     /// </summary>
     public partial class InventoryItemListWindow : Window
     {
+        public LimAppContext AppContext { get; }
         public EntityManager<InventoryItem> InventoryItems { get; }
 
-        public InventoryItemListWindow(EntityManager<InventoryItem> inventoryItems)
+        public InventoryItemListWindow(LimAppContext appContext)
         {
+            AppContext = appContext;
             InitializeComponent();
-            InventoryItems = inventoryItems;
+            InventoryItems = AppContext.InventoryItems;
             inventoryItemDataGrid.ItemsSource = InventoryItems;
         }
 
@@ -40,7 +42,7 @@ namespace LIM.Windows
         {
             if (inventoryItemDataGrid.SelectedItem != null && inventoryItemDataGrid.SelectedItem is InventoryItem)
             {
-                StaticWindowManager.OpenOrFocusInventoryItemWindow((InventoryItem)inventoryItemDataGrid.SelectedItem, InventoryItems);
+                AppContext.WindowManager.OpenOrFocusInventoryItemWindow((InventoryItem)inventoryItemDataGrid.SelectedItem, AppContext);
             }
                 
         }

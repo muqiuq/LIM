@@ -1,0 +1,30 @@
+﻿<Window x:Class="LIM.Windows.BarcodeScanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LIM.Windows"
+        mc:Ignorable="d"
+        Title="BarcodeScanWindow" Height="120" Width="440" Closing="Window_Closing">
+
+    <Window.Resources>
+        <RoutedCommand x:Key="CloseShortcut"/>
+        <RoutedCommand x:Key="CancelShortcut"/>
+    </Window.Resources>
+
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource CloseShortcut}" Executed="CommandBinding_Close"></CommandBinding>
+        <CommandBinding Command="{StaticResource CancelShortcut}" Executed="CommandBinding_Cancel"></CommandBinding>
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Key="S" Modifiers="Control" Command="{StaticResource CloseShortcut}"></KeyBinding>
+        <KeyBinding Key="Enter"  Command="{StaticResource CloseShortcut}"></KeyBinding>
+        <KeyBinding Key="Escape"  Command="{StaticResource CancelShortcut}"></KeyBinding>
+    </Window.InputBindings>
+
+    <Grid>
+        <Label Content="Please Scan OR manually enter Barcode:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="BarcodeTextBox" HorizontalAlignment="Center" Margin="0,41,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="420" Height="24"/>
+    </Grid>
+</Window>

@@ -14,6 +14,9 @@ namespace LIM.BarcodeScanner
     public class BarcodeScannerService
     {
 
+        public delegate void OnBarcodeLineReceivedDelegate(string barcode);
+        public event OnBarcodeLineReceivedDelegate OnBarcodeLineReceived;
+
         public BarcodeScannerService(LimSettings limSettings) {
             LimSettings = limSettings;
         }
@@ -44,11 +47,22 @@ namespace LIM.BarcodeScanner
         private void SpOnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             var line = ScannerSerialPort.ReadExisting().Trim();
-            Debug.WriteLine(line);
+            var parts = line.Split("\r");
+            foreach (var part in parts)
+            {
+                ExecuteBarcodeAction(part);
+            }
+        }
+
+        private void ExecuteBarcodeAction(string part)
+        {
+            Debug.WriteLine(part);
+            OnBarcodeLineReceived?.Invoke(part);
         }
 
 
         public LimSettings LimSettings { get; }
         public SerialPort ScannerSerialPort { get; private set; }
+
     }
 }

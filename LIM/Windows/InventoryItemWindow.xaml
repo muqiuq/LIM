@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LIM.Windows"
         xmlns:model="clr-namespace:LIM.Models"
         mc:Ignorable="d"
-        Title="Item" Height="566.209" Width="462.362">
+        Title="Item" Height="566.209" Width="462.362" GotFocus="Window_GotFocus" Activated="Window_Activated">
     <Window.Resources>
         <RoutedCommand x:Key="SaveShortcut"/>
         <RoutedCommand x:Key="PrintShortcut"/>
@@ -22,6 +22,7 @@
     <Window.InputBindings>
         <KeyBinding Key="S" Modifiers="Control" Command="{StaticResource SaveShortcut}"></KeyBinding>
         <KeyBinding Key="Q" Modifiers="Control" Command="{StaticResource CloseShortcut}"></KeyBinding>
+        <KeyBinding Key="Escape" Command="{StaticResource CloseShortcut}"></KeyBinding>
         <KeyBinding Key="P" Modifiers="Control" Command="{StaticResource PrintShortcut}"></KeyBinding>
     </Window.InputBindings>
 
@@ -61,9 +62,9 @@
         <TextBox Grid.Column="1" Grid.Row="3" Name="quantityunitContentBox" Text="{Binding (model:InventoryItem.Unit)}"></TextBox>
 
         <Label Grid.Column="0" Grid.Row="4">EANs:</Label>
-        <ListBox Grid.Column="1" Grid.Row="4" Name="eanContentBox" ItemsSource="{Binding (model:InventoryItem.EANs)}"></ListBox>
+        <ListBox Grid.Column="1" Grid.Row="4" Name="eanContentBox" ItemsSource="{Binding (model:InventoryItem.EANs)}" KeyDown="eanContentBox_KeyDown"></ListBox>
 
-        <Button Grid.Column="1" Grid.Row="5" Name="AddEanButton" Content="Add EAN"></Button>
+        <Button Grid.Column="1" Grid.Row="5" Name="AddEanButton" Content="Add EAN" Click="Button_Click_AddEAN"></Button>
 
         <Label Grid.Column="0" Grid.Row="6">Target:</Label>
         <TextBox Grid.Column="1" Grid.Row="6" Name="targetContentBox" Text="{Binding (model:InventoryItem.TargetInventory)}"></TextBox>
@@ -76,11 +77,11 @@
             <Button KeyboardNavigation.IsTabStop="False" x:Name="cmdDown" x:FieldModifier="private" Margin="0,5,0,5"  Content="˅" Width="40" Click="cmdDown_Click"  />
         </StackPanel>
 
-        <Button Background="LightGreen" Grid.Column="1" Grid.Row="8" Click="Button_Save_Click" >Speichern und Schliessen (Ctrl+S)</Button>
+        <Button Background="LightGreen" Grid.Column="1" Grid.Row="8" Click="Button_Save_Click" >Close and Upload(Ctrl+S)</Button>
 
-        <Button Background="LightBlue" Grid.Column="1" Grid.Row="9" Click="Button_Print_Click" >Drucken (Ctrl+P)</Button>
+        <Button Background="LightBlue" Grid.Column="1" Grid.Row="9" Click="Button_Print_Click" >Print (Ctrl+P)</Button>
 
-        <Button Background="LightYellow" Grid.Column="1" Grid.Row="10" Click="Button_Link_Click" >Im Browser öffnen</Button>
+        <Button Background="LightYellow" Grid.Column="1" Grid.Row="10" Click="Button_Link_Click" >Open in Browser</Button>
 
         <!--<Button Background="Red" Foreground="White" Grid.Column="1" Grid.Row="16" Name="testButton" Click="testButton_Click">Test</Button>-->
 

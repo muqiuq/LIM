@@ -21,10 +21,13 @@ namespace LIM
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        public LimAppContext LimAppContext { get; private set; }
         public MainWindow()
         {
+            LimAppContext = GlobalState.LimAppContext;
             InitializeComponent();
-            inventoryItemEntityManager = GlobalState.InventoryItems;
+            MainGrid.DataContext = LimAppContext.AppStateEngine;
         }
 
         public EntityManager<InventoryItem> inventoryItemEntityManager { get; private set; }
@@ -32,7 +35,7 @@ namespace LIM
 
         private void InventoryList_Click(object sender, RoutedEventArgs e)
         {
-            var inventoryItemListWindow = new InventoryItemListWindow(inventoryItemEntityManager);
+            var inventoryItemListWindow = new InventoryItemListWindow(GlobalState.LimAppContext);
             inventoryItemListWindow.Show();
         }
 

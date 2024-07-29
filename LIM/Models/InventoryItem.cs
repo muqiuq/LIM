@@ -1,7 +1,10 @@
 ﻿using LIM.EntityServices.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,9 +32,9 @@ namespace LIM.Models
         public decimal ActualInventory { get; set; }
 
         [MsListColumn("EANs")]
-        public List<string> EANs { get; set; }
+        public ObservableCollection<string> EANs { get; set; } = new ObservableCollection<string>();
 
-        [MsListColumn("Price")]
+        [MsListColumn("Preis")]
         public decimal Price { get; set; }
 
         [MsListColumn("Lieferant1")]
@@ -39,5 +42,8 @@ namespace LIM.Models
 
         [MsListColumn("Lieferant2")]
         public string SupplierLink2 { get; set; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
     }
 }
