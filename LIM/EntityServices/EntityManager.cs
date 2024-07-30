@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace LIM.EntityServices
@@ -20,6 +21,8 @@ namespace LIM.EntityServices
     {
         private List<EntityStateWrapper<T>> Items = new List<EntityStateWrapper<T>>();
         private readonly object _syncRoot = new object();
+
+        private Dictionary<string, List<string>> Choices = new Dictionary<string, List<string>>();
 
         public event NotifyCollectionChangedEventHandler? CollectionChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -34,7 +37,12 @@ namespace LIM.EntityServices
 
         public List<T> GetLocalyChangedEntries()
         {
-            return Items.Where(i => i.Updated).Select(i => i.Entity).ToList();
+            return Items.Where(i => i.Updated && i.Entity.Id != IEntity.NEW_ID_STR).Select(i => i.Entity).ToList();
+        }
+
+        public List<T> GetLocalyNewEntries()
+        {
+            return Items.Where(i => i.Updated && i.Entity.Id == IEntity.NEW_ID_STR).Select(i => i.Entity).ToList();
         }
 
         public void SetUpdated(T entity, bool value)
@@ -46,14 +54,20 @@ namespace LIM.EntityServices
             }
         }
 
-        public void Lock(T entity)
+        public bool TryLock(T entity)
         {
-            Items.Single(i => i.Entity.Equals(entity)).LockedSince = DateTime.Now;
+            var item = Items.SingleOrDefault(i => i.Entity.Equals(entity));
+            if (item == null) return false;
+            item.LockedSince = DateTime.Now;
+            return true;
         }
 
-        public void Release(T entity)
+        public bool TryRelease(T entity)
         {
-            Items.Single(i => i.Entity.Equals(entity)).LockedSince = null;
+            var item = Items.SingleOrDefault(i => i.Entity.Equals(entity));
+            if (item == null) return false;
+            item.LockedSince = null;
+            return true;
         }
 
         public void Save()
@@ -64,8 +78,13 @@ namespace LIM.EntityServices
                 {
                     WriteIndented = true
                 };
+                var saveData = new EntityManagerData<T>()
+                {
+                    Items = Items,
+                    Choices = Choices
+                };
 
-                var json = JsonSerializer.Serialize(Items, options);
+                var json = JsonSerializer.Serialize(saveData, options);
                 File.WriteAllText(FileName, json);
                 Changed = false;
             }
@@ -88,10 +107,12 @@ namespace LIM.EntityServices
                         return false;
                     }
 
-                    Items = JsonSerializer.Deserialize<List<EntityStateWrapper<T>>>(json, new JsonSerializerOptions()
+                    var loadedData = JsonSerializer.Deserialize<EntityManagerData<T>>(json, new JsonSerializerOptions()
                     {
                         IncludeFields = false
                     });
+                    Items = loadedData.Items;
+                    Choices = loadedData.Choices;
                     return true;
                 }
                 catch (Exception ex) when (ex is FileNotFoundException || ex is UnauthorizedAccessException || ex is IOException || ex is JsonException)
@@ -114,6 +135,12 @@ namespace LIM.EntityServices
         {
             lock (_syncRoot)
             {
+                if(item.Id == IEntity.NEW_ID_STR && changeSourceIsLocal)
+                {
+                    Items.Add(new EntityStateWrapper<T>(item));
+                    NotifyChange(item);
+                    return;
+                }
                 var existingItemWrapper = Items.FirstOrDefault(i => i.Entity.Id == item.Id);
                 if (existingItemWrapper == null)
                 {
@@ -154,6 +181,26 @@ namespace LIM.EntityServices
                 }
             }
         }
+
+        internal void DeleteAllExcept(List<string> serverSidePresentIds)
+        {
+            Items.Where(d => !serverSidePresentIds.Contains(d.Entity.Id) && d.Entity.Id != IEntity.NEW_ID_STR).ToList().ForEach(x => Items.Remove(x));
+            NotifyChange(this);
+        }
+
+        internal void AddOrUpdateChoices(string? name, List<string>? choices)
+        {
+            if (name == null || choices == null) return;
+            if (Choices.ContainsKey(name)) Choices[name] = choices;
+            else Choices.Add(name, choices);
+        }
+
+        internal List<string> GetChoices(string v)
+        {
+            if (!Choices.ContainsKey(v)) return new List<string>();
+            return Choices[v];
+        }
+
 
         #region IDictionary
 
@@ -258,6 +305,7 @@ namespace LIM.EntityServices
         {
             return Items.Select(x => new KeyValuePair<string, T>(x.Entity.Id, x.Entity)).GetEnumerator();
         }
+
 
         #endregion
     }

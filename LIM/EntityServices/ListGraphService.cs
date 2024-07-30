@@ -44,6 +44,53 @@ namespace LIM.EntityServices
             return value;
         }
 
+        public async Task<int> UploadNewItems<T>(EntityManager<T> manager) where T : IEntity, new()
+        {
+            var gc = GetGraphServiceClientApplication();
+
+            var site = await gc.Sites[SiteId].GetAsync();
+
+            var uploadItemChanges = 0;
+
+            var changedItems = manager.GetLocalyNewEntries();
+
+            foreach (var item in changedItems)
+            {
+                var properties = typeof(T).GetProperties();
+                var fieldsToUpdate = new Dictionary<string, object>();
+
+                foreach (var property in properties)
+                {
+                    var attribute = property.GetCustomAttribute<MsListColumn>();
+                    if (attribute != null && property.Name != "Id")
+                    {
+                        var value = property.GetValue(item);
+                        if (value != null)
+                        {
+                            fieldsToUpdate[attribute.Name] = NormalizeValue(value);
+                        }
+                    }
+                }
+
+                if (fieldsToUpdate.Any())
+                {
+                    var requestBody = new ListItem
+                    {
+                        Fields = new FieldValueSet
+                        {
+                            AdditionalData = fieldsToUpdate
+                        }
+                    };
+                    uploadItemChanges++;
+                    var updateResult = await gc.Sites[site.Id].Lists[manager.TableName].Items.PostAsync(requestBody);
+                    item.Id = updateResult.Id;
+                    manager.SetUpdated(item, false);
+                }
+
+            }
+            return uploadItemChanges;
+        }
+
         public async Task<int> UploadLocalChanges<T>(EntityManager<T> manager) where T : IEntity, new()
         {
             var gc = GetGraphServiceClientApplication();
@@ -102,6 +149,32 @@ namespace LIM.EntityServices
             return uploadItemChanges;
         }
 
+        public async Task UpdateColumnInfo<T>(EntityManager<T> manager) where T: IEntity, new()
+        {
+            var gc = GetGraphServiceClientApplication();
+
+            var selectedSite = await gc.Sites[SiteId].GetAsync();
+
+            var myList = await gc.Sites[selectedSite.Id].Lists[manager.TableName].GetAsync();
+
+            if (myList.LastModifiedDateTime != null && lastSeenModifiedDateTime >= myList.LastModifiedDateTime)
+            {
+                Debug.WriteLine("No change. No Update (columns)");
+                return;
+            }
+
+            var graphColumns = await gc.Sites[selectedSite.Id].Lists[manager.TableName].Columns.GetAsync();
+
+            foreach (var column in graphColumns.Value)
+            {
+                if(column.Choice != null)
+                {
+                    manager.AddOrUpdateChoices(column.Name, column.Choice.Choices);
+                }
+            }
+
+        }
+
         public async Task GetOrUpdateManager<T>(EntityManager<T> manager) where T : IEntity, new()
         {
             var gc = GetGraphServiceClientApplication();
@@ -120,6 +193,8 @@ namespace LIM.EntityServices
             {
                 requestConfiguration.QueryParameters.Expand = new string[] { "fields($select=*)" };
             });
+
+            var serverSidePresentIds = new List<string>();
 
             foreach (var graphItem in graphItemInList.Value)
             {
@@ -163,8 +238,11 @@ namespace LIM.EntityServices
                         }
                     }
                 }
+                item.WebUrl = graphItem.WebUrl.Substring(0, graphItem.WebUrl.LastIndexOf('/')) + $"/DispForm.aspx?ID={item.Id}";
+                serverSidePresentIds.Add(item.Id);
                 manager.AddOrUpdate(item);
             }
+            manager.DeleteAllExcept(serverSidePresentIds);
             lastSeenModifiedDateTime = myList.LastModifiedDateTime.Value;
             Debug.WriteLine("Loaded");
         }

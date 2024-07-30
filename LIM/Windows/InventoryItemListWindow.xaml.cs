@@ -1,4 +1,5 @@
 ﻿using LIM.EntityServices;
+using LIM.EntityServices.Helpers;
 using LIM.Models;
 using LIM.Windows.Helpers;
 using System;
@@ -94,6 +95,11 @@ namespace LIM.Windows
             {
                 OpenSelectedItem();
             }
+        }
+
+        private void Button_Click_New(object sender, RoutedEventArgs e)
+        {
+            AppContext.WindowManager.OpenOrFocusInventoryItemWindow(new InventoryItem() { Id=IEntity.NEW_ID_STR }, AppContext);
         }
     }
 }

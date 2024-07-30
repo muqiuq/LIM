@@ -1,7 +1,10 @@
 ﻿using LIM.EntityServices;
+using LIM.EntityServices.Helpers;
+using LIM.Helpers;
 using LIM.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -32,19 +35,22 @@ namespace LIM.Windows
         public InventoryItemWindow(InventoryItem inventoryItem, LimAppContext appContext)
         {
             InitializeComponent();
+            appContext.InventoryItems.GetChoices(ReflectionHelper.GetMsListColumnName<InventoryItem>(x => x.Type)).ForEach(x => typeChomboBox.Items.Add(x));
+            appContext.InventoryItems.GetChoices(ReflectionHelper.GetMsListColumnName<InventoryItem>(x => x.Unit)).ForEach(x => quantityunitContentBox.Items.Add(x));
             InventoryItem = inventoryItem;
             this.appContext = appContext;
             InventoryItems = appContext.InventoryItems;
             productGrid.DataContext = inventoryItem;
             stockContentBox.Text = InventoryItem.ActualInventory.ToString();
             LastFocused = DateTime.Now;
-            InventoryItems.Lock(inventoryItem);
+            InventoryItems.TryLock(inventoryItem);
         }
 
         public DateTime LastFocused { get; private set; }
 
         private void Button_Link_Click(object sender, RoutedEventArgs e)
         {
+            Process.Start(new ProcessStartInfo(InventoryItem.WebUrl) { UseShellExecute = true });
         }
 
         private void Button_Save_Click(object sender, RoutedEventArgs e)
@@ -54,6 +60,10 @@ namespace LIM.Windows
 
         public void CloseAndUpload()
         {
+            if(InventoryItem.Id == IEntity.NEW_ID_STR)
+            {
+                InventoryItems.AddOrUpdate(InventoryItem, true);
+            }
             InventoryItems.SetUpdated(InventoryItem, true);
             MarkedForUpload = true;
             Close();
@@ -150,7 +160,7 @@ namespace LIM.Windows
                     return;
                 }
             }
-            InventoryItems.Release(InventoryItem);
+            InventoryItems.TryRelease(InventoryItem);
         }
     }
 }

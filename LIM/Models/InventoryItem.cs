@@ -43,7 +43,7 @@ namespace LIM.Models
         [MsListColumn("Lieferant2")]
         public string SupplierLink2 { get; set; }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public string WebUrl { get; set; }
 
     }
 }
