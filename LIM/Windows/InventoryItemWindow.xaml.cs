@@ -111,10 +111,12 @@ namespace LIM.Windows
         private void stockContentBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (InventoryItem == null) return;
-            decimal parsedCurrentTextBoxValue = Decimal.Parse(stockContentBox.Text);
-            if (parsedCurrentTextBoxValue != InventoryItem.ActualInventory)
+            if(Decimal.TryParse(stockContentBox.Text, out var parsedCurrentTextBoxValue))
             {
-                InventoryItem.ActualInventory = parsedCurrentTextBoxValue;
+                if (parsedCurrentTextBoxValue != InventoryItem.ActualInventory)
+                {
+                    InventoryItem.ActualInventory = parsedCurrentTextBoxValue;
+                }
             }
         }
 
