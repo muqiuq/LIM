@@ -46,6 +46,16 @@ namespace LIM.EntityServices
             }
         }
 
+        public void Lock(T entity)
+        {
+            Items.Single(i => i.Entity.Equals(entity)).LockedSince = DateTime.Now;
+        }
+
+        public void Release(T entity)
+        {
+            Items.Single(i => i.Entity.Equals(entity)).LockedSince = null;
+        }
+
         public void Save()
         {
             lock (_syncRoot)
@@ -113,6 +123,15 @@ namespace LIM.EntityServices
                 else
                 {
                     var existingItem = existingItemWrapper.Entity;
+
+                    if ((existingItemWrapper.LockedSince != null &&
+                        (DateTime.Now - existingItemWrapper.LockedSince) < TimeSpan.FromMinutes(30)) 
+                        || existingItemWrapper.Updated)
+                    {
+                        // Could be still open or just updated. Not updating
+                        return;
+                    }
+
                     var updated = false;
 
                     foreach (var property in typeof(T).GetProperties())

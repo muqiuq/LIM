@@ -47,8 +47,6 @@ namespace LIM.Engines
                 AppContext.WindowManager.CloseLastActiveWindow();
             }
 
-            
-
             else if (StateManager.State == AppState.Lookup 
                 || StateManager.State == AppState.CheckIn 
                 || StateManager.State == AppState.CheckOut)
@@ -63,7 +61,9 @@ namespace LIM.Engines
 
                 foreach (var inventoryItem in inventoryItems)
                 {
-                    AppContext.WindowManager.OpenOrFocusInventoryItemWindow(inventoryItem, AppContext, amount);
+                    AppContext.WindowManager.OpenOrFocusInventoryItemWindow(inventoryItem, AppContext, 
+                        addOrRemove: amount, 
+                        closeOthers: StateManager.State is AppState.CheckIn or AppState.CheckOut);
                 }
             }
         }

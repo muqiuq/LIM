@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace LIM
 {
@@ -23,11 +24,48 @@ namespace LIM
     {
 
         public LimAppContext LimAppContext { get; private set; }
+
+        DispatcherTimer Timer = new DispatcherTimer();
         public MainWindow()
         {
             LimAppContext = GlobalState.LimAppContext;
             InitializeComponent();
             MainGrid.DataContext = LimAppContext.AppStateEngine;
+            Timer.Tick += Timer_Tick;
+            Timer.Interval = new TimeSpan(0, 0, 1);
+            Timer.Start();
+        }
+
+        private void Timer_Tick(object? sender, EventArgs e)
+        {
+            UpdateSyncStatus();
+            UpdateBarcodeStatus();
+        }
+
+        private void UpdateBarcodeStatus()
+        {
+            BarcodeScannerLabel.Content =
+                (GlobalState.LimAppContext.BarcodeScannerService.IsConnected ? $"Connected" : "Disconnected") +
+                $" @ {GlobalState.LimAppContext.BarcodeScannerService.ComPort}";
+        }
+
+        private void UpdateSyncStatus()
+        {
+            var lastUpdate = GlobalState.SyncListGraphTask.LastSuccessfulUpdate;
+            if (lastUpdate == null || lastUpdate == DateTime.MinValue) return;
+            var diffSinceNow = DateTime.Now - lastUpdate;
+            if (diffSinceNow.TotalMinutes < 1)
+            {
+                SyncStatusLabel.Content = $"{diffSinceNow.TotalSeconds:N0} seconds ago";
+            }
+            else if (diffSinceNow.TotalMinutes < 5)
+            {
+                SyncStatusLabel.Content = $"{diffSinceNow.TotalMinutes:N0} minutes ago";
+            }
+            else
+            {
+                SyncStatusLabel.Content = lastUpdate.ToString("dd.MM.yyyy HH:mm:ss");
+            }
         }
 
         public EntityManager<InventoryItem> inventoryItemEntityManager { get; private set; }

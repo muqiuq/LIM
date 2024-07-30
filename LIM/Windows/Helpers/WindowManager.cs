@@ -28,18 +28,22 @@ namespace LIM.Windows.Helpers
             }
         }
 
-        public void OpenOrFocusInventoryItemWindow(InventoryItem item, LimAppContext appContext, int addOrRemove = 0) 
+        public void OpenOrFocusInventoryItemWindow(InventoryItem item, LimAppContext appContext, int addOrRemove = 0, bool closeOthers = false) 
         {
             if (!Application.Current.Dispatcher.CheckAccess())
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
-                    OpenOrFocusInventoryItemWindow(item, appContext, addOrRemove);
+                    OpenOrFocusInventoryItemWindow(item, appContext, addOrRemove, closeOthers);
                 });
                 return;
             }
             
             lock (_lock)
             {
+                if (closeOthers)
+                {
+                    CloseAllWindowsExcept(item);
+                }
                 CleanUpClosedWindows();
                 if(!InventoryItemToWindow.ContainsKey(item) )
                 {
@@ -58,6 +62,19 @@ namespace LIM.Windows.Helpers
             
         }
 
+        private void CloseAllWindowsExcept(params InventoryItem[] items)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate { CloseAllWindowsExcept(items); });
+                return;
+            }
+
+            // ReSharper disable once InconsistentlySynchronizedField
+            InventoryItemToWindow.Where(x => !items.Contains(x.Key))
+                .Select(x => x.Value).ToList().ForEach(x => x.CloseAndUpload());
+        }
+
         public void CloseLastActiveWindow()
         {
             if (!Application.Current.Dispatcher.CheckAccess())
@@ -72,7 +89,7 @@ namespace LIM.Windows.Helpers
 
                 InventoryItemToWindow
                     .OrderByDescending(x => x.Value.LastFocused).Select(x => x.Value)
-                    .FirstOrDefault()?.Close();
+                    .FirstOrDefault()?.CloseAndUpload();
             }
         }
     }

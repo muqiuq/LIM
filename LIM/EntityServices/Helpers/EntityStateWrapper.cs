@@ -12,6 +12,8 @@ namespace LIM.EntityServices.Helpers
 
         public bool Updated { get; set; } = false;
 
+        public DateTime? LockedSince { get; set; } = null;
+
         public EntityStateWrapper(T t)
         {
             this.Entity = t;

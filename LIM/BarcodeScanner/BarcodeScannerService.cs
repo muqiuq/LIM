@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace LIM.BarcodeScanner
 {
-    public class BarcodeScannerService
+    public class BarcodeScannerService : IDisposable
     {
 
         public delegate void OnBarcodeLineReceivedDelegate(string barcode);
@@ -63,6 +63,12 @@ namespace LIM.BarcodeScanner
 
         public LimSettings LimSettings { get; }
         public SerialPort ScannerSerialPort { get; private set; }
+        public bool IsConnected => ScannerSerialPort?.IsOpen ?? false;
+        public string ComPort => ScannerSerialPort?.PortName ?? "";
 
+        public void Dispose()
+        {
+            ScannerSerialPort.Dispose();
+        }
     }
 }

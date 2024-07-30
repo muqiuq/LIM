@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LIM"
         xmlns:engines="clr-namespace:LIM.Engines"
         mc:Ignorable="d"
-        Title="LIM" Height="232" Width="400" ResizeMode="NoResize">
+        Title="LIM" Height="289" Width="400" ResizeMode="NoResize">
     <Grid x:Name="MainGrid">
         <Label Content="User:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20"/>
         <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" FontSize="20"/>
@@ -16,6 +16,10 @@
                   ItemsSource="{Binding Path=AppStates}"
                   SelectedItem="{Binding Path=State, Mode=TwoWay}" FontSize="20"/>
         <Label x:Name="UserLabel" Content="{Binding Path=ActiveUser, Mode=TwoWay}" HorizontalAlignment="Left" Margin="123,10,0,0" VerticalAlignment="Top" Width="247" FontSize="20" Height="36"/>
+        <Label Content="Sync Status: " HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="93"/>
+        <Label x:Name="SyncStatusLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,195,0,0" VerticalAlignment="Top" Width="274"/>
+        <Label Content="Barcode Scanner: " HorizontalAlignment="Left" Margin="10,221,0,0" VerticalAlignment="Top" Width="101"/>
+        <Label x:Name="BarcodeScannerLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,221,0,0" VerticalAlignment="Top" Width="274"/>
 
     </Grid>
 </Window>

@@ -25,6 +25,8 @@ namespace LIM.Windows
         public InventoryItem InventoryItem;
         private readonly LimAppContext appContext;
 
+        private bool MarkedForUpload = false;
+
         public EntityManager<InventoryItem> InventoryItems { get; }
 
         public InventoryItemWindow(InventoryItem inventoryItem, LimAppContext appContext)
@@ -36,6 +38,7 @@ namespace LIM.Windows
             productGrid.DataContext = inventoryItem;
             stockContentBox.Text = InventoryItem.ActualInventory.ToString();
             LastFocused = DateTime.Now;
+            InventoryItems.Lock(inventoryItem);
         }
 
         public DateTime LastFocused { get; private set; }
@@ -46,7 +49,13 @@ namespace LIM.Windows
 
         private void Button_Save_Click(object sender, RoutedEventArgs e)
         {
+            CloseAndUpload();
+        }
+
+        public void CloseAndUpload()
+        {
             InventoryItems.SetUpdated(InventoryItem, true);
+            MarkedForUpload = true;
             Close();
         }
 
@@ -126,6 +135,22 @@ namespace LIM.Windows
         private void Window_Activated(object sender, EventArgs e)
         {
             LastFocused = DateTime.Now;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!MarkedForUpload)
+            {
+                var result = MessageBox.Show(this,
+                    "Are you sure want to discard your changes (will be overwritten by the next sync)?", "Warning",
+                    MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+            InventoryItems.Release(InventoryItem);
         }
     }
 }

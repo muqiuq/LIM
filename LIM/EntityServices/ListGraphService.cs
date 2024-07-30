@@ -95,6 +95,7 @@ namespace LIM.EntityServices
                     };
                     uploadItemChanges++;
                     var updateResult = await gc.Sites[site.Id].Lists[manager.TableName].Items[item.Id].Fields.PatchAsync(requestBody);
+                    manager.SetUpdated(item, false);
                 }
 
             }
@@ -114,8 +115,6 @@ namespace LIM.EntityServices
                 Debug.WriteLine("No change. No Update");
                 return;
             }
-
-
 
             var graphItemInList = await gc.Sites[selectedSite.Id].Lists[manager.TableName].Items.GetAsync((requestConfiguration) =>
             {

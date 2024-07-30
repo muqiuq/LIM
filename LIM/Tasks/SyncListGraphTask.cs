@@ -26,6 +26,8 @@ namespace LIM.Tasks
 
         private DateTime nextRun;
 
+        public DateTime LastSuccessfulUpdate { get; private set; }
+
         public SyncListGraphTask(ListGraphService graphService, EntityManager<InventoryItem> inventoryItemEntityManger)
         {
             nextRun = DateTime.Now;
@@ -91,11 +93,13 @@ namespace LIM.Tasks
             }
             var taskUpload = GraphService.UploadLocalChanges(InventoryItemEntityManger);
             taskUpload.Wait();
+            Debug.WriteLine($"Uploaded {taskUpload.Result}");
 
             var taskSync = GraphService.GetOrUpdateManager(InventoryItemEntityManger);
             taskSync.Wait();
             if(InventoryItemEntityManger.Changed) InventoryItemEntityManger.Save();
             Debug.WriteLine("Sync Task runned");
+            LastSuccessfulUpdate = DateTime.Now;
         }
 
        

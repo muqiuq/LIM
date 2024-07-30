@@ -3,6 +3,7 @@ using LIM.Models;
 using LIM.Windows.Helpers;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace LIM.Windows
     /// </summary>
     public partial class InventoryItemListWindow : Window
     {
+        private readonly CollectionViewSource itemSourceList;
+        private readonly ICollectionView itemSourceListView;
         public LimAppContext AppContext { get; }
         public EntityManager<InventoryItem> InventoryItems { get; }
 
@@ -30,21 +33,67 @@ namespace LIM.Windows
             AppContext = appContext;
             InitializeComponent();
             InventoryItems = AppContext.InventoryItems;
-            inventoryItemDataGrid.ItemsSource = InventoryItems;
+            
+
+            itemSourceList = new CollectionViewSource() { Source = InventoryItems };
+            itemSourceListView = itemSourceList.View;
+            inventoryItemDataGrid.ItemsSource = itemSourceList.View;
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            var itemFilter = new Predicate<object>(TargetItemFilter);
 
+            itemSourceListView.Filter = itemFilter;
+        }
+
+        private bool TargetItemFilter(object obj)
+        {
+            var searchTerm = searchTexBox.Text.ToLower();
+            var p = (InventoryItem)obj;
+
+            if (string.IsNullOrWhiteSpace(searchTerm)) return true;
+            searchTerm = searchTerm.Trim();
+
+            return
+                p.Id.ToString().Contains(searchTerm)
+                || p.Description.ToLower().Contains(searchTerm)
+                || string.Join("", p.EANs).Contains(searchTerm);
         }
 
         private void inventoryItemDataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            OpenSelectedItem();
+        }
+
+        private void OpenSelectedItem()
         {
             if (inventoryItemDataGrid.SelectedItem != null && inventoryItemDataGrid.SelectedItem is InventoryItem)
             {
                 AppContext.WindowManager.OpenOrFocusInventoryItemWindow((InventoryItem)inventoryItemDataGrid.SelectedItem, AppContext);
             }
-                
+        }
+
+        private void CommandBinding_Search(object sender, ExecutedRoutedEventArgs e)
+        {
+            searchTexBox.Focus();
+        }
+
+        private void searchTexBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && !itemSourceListView.IsEmpty)
+            {
+                inventoryItemDataGrid.SelectedIndex = 0;
+                inventoryItemDataGrid.Focus();
+            }
+        }
+
+        private void inventoryItemDataGrid_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                OpenSelectedItem();
+            }
         }
     }
 }
