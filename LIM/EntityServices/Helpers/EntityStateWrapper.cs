@@ -10,6 +10,7 @@ namespace LIM.EntityServices.Helpers
     {
         public T Entity { get; set; }
 
+        // Entity has been changed localy and need to be synced
         public bool Updated { get; set; } = false;
 
         public bool RequiresLogEntry { get; set; } = false;

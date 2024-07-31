@@ -21,15 +21,17 @@ namespace LIM.Windows
     public partial class BarcodeScanWindow : Window
     {
         private readonly LimAppContext appContext;
+        private readonly bool doExecute;
         private readonly AppState beforeState;
 
         public string Barcode { get; private set; }
 
         public bool Success { get; private set; } = true;
 
-        public BarcodeScanWindow(LimAppContext appContext)
+        public BarcodeScanWindow(LimAppContext appContext, bool doExecute = false)
         {
             this.appContext = appContext;
+            this.doExecute = doExecute;
             InitializeComponent();
             beforeState = appContext.AppStateEngine.State;
             appContext.AppStateEngine.State = AppState.SingleScan;
@@ -53,6 +55,10 @@ namespace LIM.Windows
             Barcode = BarcodeTextBox.Text;
             appContext.AppStateEngine.State = beforeState;
             if (string.IsNullOrWhiteSpace(Barcode)) Success = false;
+            else if(doExecute)
+            {
+                appContext.BarcodeScannerService.ExecuteBarcodeAction(Barcode);
+            }
         }
 
         private void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
@@ -64,6 +70,11 @@ namespace LIM.Windows
         {
             Success = false;
             Close();
+        }
+
+        private void Window_Initialized(object sender, EventArgs e)
+        {
+            BarcodeTextBox.Focus();
         }
     }
 }

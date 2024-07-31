@@ -1,5 +1,6 @@
 ﻿using LIM.EntityServices.Helpers;
 using LIM.Models;
+using Microsoft.Graph.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,6 +58,11 @@ namespace LIM.EntityServices
             {
                 NotifyChange(null);
             }
+        }
+
+        internal bool IsUpdated(InventoryItem inventoryItem)
+        {
+            return Items.Single(i => i.Entity.Equals(inventoryItem)).Updated;
         }
 
 
@@ -319,6 +325,7 @@ namespace LIM.EntityServices
             return Items.Select(x => new KeyValuePair<string, T>(x.Entity.Id, x.Entity)).GetEnumerator();
         }
 
+        
         #endregion
     }
 }

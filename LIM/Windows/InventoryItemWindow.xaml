@@ -65,7 +65,7 @@
         <ComboBox Grid.Column="1" Grid.Row="3" Name="quantityunitContentBox" Text="{Binding (model:InventoryItem.Unit)}"></ComboBox>
 
         <Label Grid.Column="0" Grid.Row="4">EANs:</Label>
-        <ListBox Grid.Column="1" Grid.Row="4" Name="eanContentBox" ItemsSource="{Binding (model:InventoryItem.EANs)}" KeyDown="eanContentBox_KeyDown"></ListBox>
+        <ListBox Grid.Column="1" Grid.Row="4" Name="eanContentBox" ItemsSource="{Binding (model:InventoryItem.EANs)}" KeyDown="eanContentBox_KeyDown" MouseDoubleClick="eanContentBox_MouseDoubleClick"></ListBox>
 
         <Button Grid.Column="1" Grid.Row="5" Name="AddEanButton" Content="Add EAN" Click="Button_Click_AddEAN"></Button>
 
@@ -78,6 +78,7 @@
             <TextBox x:Name="stockContentBox" x:FieldModifier="private" Margin="5,5,0,5" Width="100" Text="0" TextAlignment="Right" FontSize="25" FontWeight="Bold" PreviewTextInput="stockContentBox_PreviewTextInput" TextChanged="stockContentBox_TextChanged"  />
             <Button KeyboardNavigation.IsTabStop="False" x:Name="cmdUp" x:FieldModifier="private" Margin="5,5,0,5" Content="˄" Width="40" Click="cmdUp_Click" />
             <Button KeyboardNavigation.IsTabStop="False" x:Name="cmdDown" x:FieldModifier="private" Margin="0,5,0,5"  Content="˅" Width="40" Click="cmdDown_Click"  />
+            <Label x:Name="StockDeltaLabel" Margin="10,5,0,5" Content="+/- 0" FontSize="20"></Label>
         </StackPanel>
 
         <Button Background="LightGreen" Grid.Column="1" Grid.Row="8" Click="Button_Save_Click" >Close and Upload(Ctrl+S)</Button>

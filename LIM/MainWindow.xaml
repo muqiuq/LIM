@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="LIM" Height="289" Width="400" ResizeMode="NoResize">
     <Grid x:Name="MainGrid">
-        <Label Content="User:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20"/>
+        <Label Content="User:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" MouseDoubleClick="Label_MouseDoubleClick"/>
         <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" FontSize="20"/>
         <Button Content="Inventory" HorizontalAlignment="Left" Margin="10,114,0,0" VerticalAlignment="Top" Click="InventoryList_Click" Height="42" Width="371" FontSize="20"/>
         <Button Content="Settings" HorizontalAlignment="Left" Margin="10,167,0,0" VerticalAlignment="Top" Click="Button_Click_Settings"/>

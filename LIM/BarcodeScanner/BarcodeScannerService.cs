@@ -57,7 +57,7 @@ namespace LIM.BarcodeScanner
             }
         }
 
-        private void ExecuteBarcodeAction(string part)
+        public void ExecuteBarcodeAction(string part)
         {
             Logger.LogDebug($"Barcode scanner input: {part}");
             OnBarcodeLineReceived?.Invoke(part);

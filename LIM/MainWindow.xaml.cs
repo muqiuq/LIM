@@ -90,5 +90,11 @@ namespace LIM
             ReconnectButton.Visibility = Visibility.Hidden;
             GlobalState.LimAppContext.BarcodeScannerService.ReStart();
         }
+
+        private void Label_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var barcodeWindow = new BarcodeScanWindow(GlobalState.LimAppContext, true);
+            barcodeWindow.Show();
+        }
     }
 }

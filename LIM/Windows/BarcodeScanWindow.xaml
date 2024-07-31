@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LIM.Windows"
         mc:Ignorable="d"
-        Title="Barcode Input" Height="130" Width="440" Closing="Window_Closing">
+        Title="Barcode Input" Height="146" Width="440" Closing="Window_Closing" Initialized="Window_Initialized">
 
     <Window.Resources>
         <RoutedCommand x:Key="CloseShortcut"/>

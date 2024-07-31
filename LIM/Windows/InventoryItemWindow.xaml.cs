@@ -17,6 +17,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using TextCopy;
 
 namespace LIM.Windows
 {
@@ -34,6 +35,8 @@ namespace LIM.Windows
 
         public EntityManager<InventoryItem> InventoryItems { get; }
 
+        private decimal startInventory;
+
         public bool HasBeenClosed { get; private set; } = false;
 
         public InventoryItemWindow(InventoryItem inventoryItem, LimAppContext appContext)
@@ -50,7 +53,8 @@ namespace LIM.Windows
             InventoryItem = inventoryItem;
             this.appContext = appContext;
             InventoryItems = appContext.InventoryItems;
-            if(!inventoryItem.OriginalInventoryFromRemote.HasValue)
+            startInventory = InventoryItem.ActualInventory;
+            if(!appContext.InventoryItems.IsUpdated(inventoryItem))
             {
                 inventoryItem.OriginalInventoryFromRemote = inventoryItem.ActualInventory;
             }
@@ -113,6 +117,22 @@ namespace LIM.Windows
         private void UpdateStockContentBox()
         {
             stockContentBox.Text = InventoryItem.ActualInventory.ToString();
+            if (startInventory < InventoryItem.ActualInventory)
+            {
+                StockDeltaLabel.Content = "+ ";
+                StockDeltaLabel.Background = new SolidColorBrush(Colors.LightGreen);
+            }
+            else if (startInventory == InventoryItem.ActualInventory)
+            {
+                StockDeltaLabel.Content = "+/- ";
+                StockDeltaLabel.Background = new SolidColorBrush(Colors.White);
+            }
+            else
+            {
+                StockDeltaLabel.Content = "";
+                StockDeltaLabel.Background = new SolidColorBrush(Colors.LightPink);
+            }
+            StockDeltaLabel.Content += (InventoryItem.ActualInventory - startInventory).ToString();
         }
 
         private void cmdDown_Click(object sender, RoutedEventArgs e)
@@ -186,6 +206,12 @@ namespace LIM.Windows
                 }
             }
             InventoryItems.TryRelease(InventoryItem);
+        }
+
+        private void eanContentBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (eanContentBox.SelectedItem == null) return;
+            ClipboardService.SetText(eanContentBox.SelectedItem.ToString());
         }
     }
 }

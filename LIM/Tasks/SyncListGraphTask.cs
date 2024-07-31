@@ -116,14 +116,15 @@ namespace LIM.Tasks
 
             var taskUpload = GraphService.UploadLocalChanges(InventoryItemEntityManger);
             taskUpload.Wait();
-            if(taskUpload.Result > 0) Logger.LogInformation($"Uploaded {taskUpload.Result}");
+            if(taskUpload.Result > 0) Logger.LogInformation($"Uploaded {taskUpload.Result} inventory items");
 
             var taskUpload2 = GraphService.UploadNewItems(InventoryItemEntityManger);
             taskUpload2.Wait();
-            if (taskUpload2.Result > 0) Logger.LogInformation($"Created {taskUpload2.Result}");
+            if (taskUpload2.Result > 0) Logger.LogInformation($"Created {taskUpload2.Result} inventory items");
 
             var taskLogEntries = CalculateChangesAndCreateLogEntries();
             taskLogEntries.Wait();
+            if (taskLogEntries.Result > 0) Logger.LogInformation($"Created {taskLogEntries.Result} log entries");
 
             var taskSync = GraphService.GetOrUpdateManager(InventoryItemEntityManger);
             taskSync.Wait();
@@ -132,9 +133,10 @@ namespace LIM.Tasks
             Logger.LogInformation($"Microsoft Graph Sharepoint List Sync Task finished successfully @ {LastSuccessfulUpdate}");
         }
 
-        private async Task CalculateChangesAndCreateLogEntries()
+        private async Task<int> CalculateChangesAndCreateLogEntries()
         {
             var changedItems = InventoryItemEntityManger.GetEntriesThatRequireLogEntries();
+            var numberOfNewEntries = 0;
 
             foreach (var changedItem in changedItems)
             {
@@ -151,8 +153,13 @@ namespace LIM.Tasks
                 };
                 var taskCreateLogEntry = await GraphService.CreateNewItem(Settings.LogListName, inventoryLogItem);
                 if (!taskCreateLogEntry) Logger.LogError($"Failed to craete log entry for {changedItem.Id} {changedItem.Description}");
-                InventoryItemEntityManger.SetRequiresLogEntry(changedItem, false);
+                else
+                {
+                    InventoryItemEntityManger.SetRequiresLogEntry(changedItem, false);
+                    numberOfNewEntries++;
+                }
             }
+            return numberOfNewEntries;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
