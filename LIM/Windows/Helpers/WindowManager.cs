@@ -49,7 +49,7 @@ namespace LIM.Windows.Helpers
                 {
                     var wind = new InventoryItemWindow(item, appContext);
                     InventoryItemToWindow.Add(item, wind);
-                    wind.Show();
+                    if(!wind.HasBeenClosed) wind.Show();
                     if (addOrRemove != 0) wind.AddOrRemove(addOrRemove);
                 }
                 else

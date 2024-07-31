@@ -31,6 +31,8 @@ namespace LIM.Models
         [MsListColumn("Ist")]
         public decimal ActualInventory { get; set; }
 
+        public decimal? OriginalInventoryFromRemote { get; set; }
+
         [MsListColumn("EANs")]
         public ObservableCollection<string> EANs { get; set; } = new ObservableCollection<string>();
 

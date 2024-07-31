@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:LIM.Windows"
         xmlns:model="clr-namespace:LIM.Helpers"
         mc:Ignorable="d"
-        Title="LimSettingsWindow" Height="234" Width="560">
+        Title="LimSettingsWindow" Height="265" Width="560">
 
     <Grid x:Name="settingGrid">
         <Grid.ColumnDefinitions>
@@ -21,21 +21,27 @@
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
             <RowDefinition Height="30" />
+            <RowDefinition Height="30" />
 
         </Grid.RowDefinitions>
-        <Label Grid.Column="0" Grid.Row="0">ListName</Label>
+        <Label Grid.Column="0" Grid.Row="0">ListName:</Label>
         <TextBox Grid.Column="1" Grid.Row="0" Name="listNameTextBox"  Text="{Binding (model:LimSettings.ListName)}"></TextBox>
 
-        <Label Grid.Column="0" Grid.Row="1">SharePointShareUrl:</Label>
-        <TextBox Grid.Column="1" Grid.Row="1" Name="sharePointTextBox"  Text="{Binding (model:LimSettings.SharePointUrl)}"></TextBox>
+        <Label Grid.Column="0" Grid.Row="1">Log ListName:</Label>
+        <TextBox Grid.Column="1" Grid.Row="1" Name="logListNameTextBox" Text="{Binding (model:LimSettings.LogListName)}"></TextBox>
 
-        <Label Grid.Column="0" Grid.Row="2">Barcode Scanner COM Port:</Label>
-        <TextBox Grid.Column="1" Grid.Row="2" Name="barcodeScannerComPortTextBox" Text="{Binding (model:LimSettings.BarcodeScannerComPort)}"></TextBox>
+        <Label Grid.Column="0" Grid.Row="2">SharePointShareUrl:</Label>
+        <TextBox Grid.Column="1" Grid.Row="2" Name="sharePointTextBox"  Text="{Binding (model:LimSettings.SharePointUrl)}"></TextBox>
 
-        <Label Grid.Column="0" Grid.Row="3">Barcode Scanner Baud:</Label>
-        <TextBox Grid.Column="1" Grid.Row="3" Name="barcodeScannerBaudTextBox" Text="{Binding (model:LimSettings.BarcodeScannerBaud)}"></TextBox>
+        <Label Grid.Column="0" Grid.Row="3">Barcode Scanner COM Port:</Label>
+        <TextBox Grid.Column="1" Grid.Row="3" Name="barcodeScannerComPortTextBox" Text="{Binding (model:LimSettings.BarcodeScannerComPort)}"></TextBox>
 
-        <Button Background="LightGreen" Grid.Column="1" Grid.Row="5" Click="Button_Save_Click" >Speichern und Schliessen (Ctrl+S)</Button>
+        <Label Grid.Column="0" Grid.Row="4">Barcode Scanner Baud:</Label>
+        <TextBox Grid.Column="1" Grid.Row="4" Name="barcodeScannerBaudTextBox" Text="{Binding (model:LimSettings.BarcodeScannerBaud)}"></TextBox>
+
+        
+
+        <Button Background="LightGreen" Grid.Column="1" Grid.Row="6" Click="Button_Save_Click" >Speichern und Schliessen (Ctrl+S)</Button>
         
     </Grid>
 </Window>

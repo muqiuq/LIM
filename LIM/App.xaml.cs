@@ -26,8 +26,7 @@ namespace LIM
 
             var inventoryItemEntityManager = new EntityManager<InventoryItem>(GlobalState.UserSettings.ListName, GlobalState.InventoryItemFileName);
             inventoryItemEntityManager.TryLoad();
-            GlobalState.SyncListGraphTask = new SyncListGraphTask(graphService, inventoryItemEntityManager);
-            GlobalState.SyncListGraphTask.StartAsync(new CancellationToken());
+            
 
             GlobalState.LimAppContext = new LimAppContext()
             {
@@ -36,6 +35,10 @@ namespace LIM
                 InventoryItems = inventoryItemEntityManager,
                 AppStateEngine = new AppStateManager()
             };
+
+            GlobalState.SyncListGraphTask = new SyncListGraphTask(graphService, inventoryItemEntityManager, 
+                GlobalState.LimAppContext.AppStateEngine, GlobalState.UserSettings);
+            GlobalState.SyncListGraphTask.StartAsync(new CancellationToken());
 
             GlobalState.AppLogicLinker = new AppLogicLinker(GlobalState.LimAppContext);
 

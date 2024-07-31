@@ -99,7 +99,9 @@ namespace LIM.Windows
 
         private void Button_Click_New(object sender, RoutedEventArgs e)
         {
-            AppContext.WindowManager.OpenOrFocusInventoryItemWindow(new InventoryItem() { Id=IEntity.NEW_ID_STR }, AppContext);
+            AppContext.WindowManager.OpenOrFocusInventoryItemWindow(
+                new InventoryItem() { Id=IEntity.NEW_ID_STR, ActualInventory = 0, 
+                    OriginalInventoryFromRemote = 0, TargetInventory = 0 }, AppContext);
         }
     }
 }

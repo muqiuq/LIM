@@ -1,4 +1,6 @@
-﻿using LIM.EntityServices;
+﻿using LIM.Engines;
+using LIM.EntityServices;
+using LIM.Helpers;
 using LIM.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +23,9 @@ namespace LIM.Tasks
         public IConfiguration Configuration { get; }
         public ListGraphService GraphService { get; }
         public EntityManager<InventoryItem> InventoryItemEntityManger { get; }
+        public LimAppContext AppContext { get; }
+        public AppStateManager AppStateManager { get; }
+        public LimSettings Settings { get; }
 
         private bool isRunning = false;
 
@@ -30,11 +35,16 @@ namespace LIM.Tasks
 
         public DateTime LastSuccessfulUpdate { get; private set; }
 
-        public SyncListGraphTask(ListGraphService graphService, EntityManager<InventoryItem> inventoryItemEntityManger)
+        public SyncListGraphTask(ListGraphService graphService, 
+            EntityManager<InventoryItem> inventoryItemEntityManger,
+            AppStateManager appStateManager,
+            LimSettings settings)
         {
             nextRun = DateTime.Now;
             GraphService = graphService;
             InventoryItemEntityManger = inventoryItemEntityManger;
+            AppStateManager = appStateManager;
+            Settings = settings;
         }
 
         public void Dispose()
@@ -109,6 +119,9 @@ namespace LIM.Tasks
             taskUpload2.Wait();
             Debug.WriteLine($"Uploaded {taskUpload2.Result}");
 
+            var taskLogEntries = CalculateChangesAndCreateLogEntries();
+            taskLogEntries.Wait();
+
             var taskSync = GraphService.GetOrUpdateManager(InventoryItemEntityManger);
             taskSync.Wait();
             if(InventoryItemEntityManger.Changed) InventoryItemEntityManger.Save();
@@ -116,7 +129,27 @@ namespace LIM.Tasks
             LastSuccessfulUpdate = DateTime.Now;
         }
 
-       
+        private async Task CalculateChangesAndCreateLogEntries()
+        {
+            var changedItems = InventoryItemEntityManger.GetEntriesThatRequireLogEntries();
+
+            foreach (var changedItem in changedItems)
+            {
+                if (!changedItem.OriginalInventoryFromRemote.HasValue || 
+                    changedItem.ActualInventory == changedItem.OriginalInventoryFromRemote) continue;
+                var inventoryLogItem = new InventoryLogItem()
+                {
+                    StockChange = changedItem.ActualInventory - changedItem.OriginalInventoryFromRemote.Value,
+                    InventoryItemDescription = changedItem.Description,
+                    InventoryItemId = changedItem.Id,
+                    Timestamp = DateTime.UtcNow,
+                    Username = AppStateManager.ActiveUser
+                };
+                var taskCreateLogEntry = await GraphService.CreateNewItem(Settings.LogListName, inventoryLogItem);
+                Debug.WriteLine(taskCreateLogEntry ? "Created log entry" : "Failed to craete log entry");
+                InventoryItemEntityManger.SetRequiresLogEntry(changedItem, false);
+            }
+        }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {

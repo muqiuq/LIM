@@ -13,5 +13,6 @@ namespace LIM.EntityServices.Helpers
         string Id { get; set; }
 
         string WebUrl { get; set; }
+
     }
 }

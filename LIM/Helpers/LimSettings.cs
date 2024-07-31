@@ -15,6 +15,8 @@ namespace LIM.Helpers
 
         public string ListName { get;set; }
 
+        public string LogListName { get; set; }
+
         public string BarcodeScannerComPort { get; set; } = "COM1";
 
         public int BarcodeScannerBaud { get; set; } = 9600;

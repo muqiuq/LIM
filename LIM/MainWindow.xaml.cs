@@ -47,6 +47,8 @@ namespace LIM
             BarcodeScannerLabel.Content =
                 (GlobalState.LimAppContext.BarcodeScannerService.IsConnected ? $"Connected" : "Disconnected") +
                 $" @ {GlobalState.LimAppContext.BarcodeScannerService.ComPort}";
+
+            ReconnectButton.Visibility = GlobalState.LimAppContext.BarcodeScannerService.IsConnected ? Visibility.Hidden : Visibility.Visible;
         }
 
         private void UpdateSyncStatus()
@@ -81,6 +83,12 @@ namespace LIM
         {
             var LimSettingsWindow = new LimSettingsWindow();
             LimSettingsWindow.ShowDialog();
+        }
+
+        private void Button_Click_Reconnect(object sender, RoutedEventArgs e)
+        {
+            ReconnectButton.Visibility = Visibility.Hidden;
+            GlobalState.LimAppContext.BarcodeScannerService.ReStart();
         }
     }
 }

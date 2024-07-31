@@ -44,6 +44,45 @@ namespace LIM.EntityServices
             return value;
         }
 
+        public async Task<bool> CreateNewItem<T>(String TableName, T entity) where T : IEntity, new()
+        {
+            var gc = GetGraphServiceClientApplication();
+
+            var site = await gc.Sites[SiteId].GetAsync();
+
+            var properties = typeof(T).GetProperties();
+            var fieldsToUpdate = new Dictionary<string, object>();
+
+            foreach (var property in properties)
+            {
+                var attribute = property.GetCustomAttribute<MsListColumn>();
+                if (attribute != null && property.Name.ToLower() != "id")
+                {
+                    var value = property.GetValue(entity);
+                    if (value != null)
+                    {
+                        fieldsToUpdate[attribute.Name] = NormalizeValue(value);
+                    }
+                }
+            }
+
+            if (fieldsToUpdate.Any())
+            {
+                var requestBody = new ListItem
+                {
+                    Fields = new FieldValueSet
+                    {
+                        AdditionalData = fieldsToUpdate
+                    }
+                };
+                var updateResult = await gc.Sites[site.Id].Lists[TableName].Items.PostAsync(requestBody);
+                if (updateResult == null) return false;
+                entity.Id = updateResult.Id;
+                return true;
+            }
+            return false;
+        }
+
         public async Task<int> UploadNewItems<T>(EntityManager<T> manager) where T : IEntity, new()
         {
             var gc = GetGraphServiceClientApplication();
@@ -62,7 +101,7 @@ namespace LIM.EntityServices
                 foreach (var property in properties)
                 {
                     var attribute = property.GetCustomAttribute<MsListColumn>();
-                    if (attribute != null && property.Name != "Id")
+                    if (attribute != null && property.Name.ToLower() != "id")
                     {
                         var value = property.GetValue(item);
                         if (value != null)
@@ -143,6 +182,7 @@ namespace LIM.EntityServices
                     uploadItemChanges++;
                     var updateResult = await gc.Sites[site.Id].Lists[manager.TableName].Items[item.Id].Fields.PatchAsync(requestBody);
                     manager.SetUpdated(item, false);
+                    manager.SetRequiresLogEntry(item, true);
                 }
 
             }
@@ -173,6 +213,19 @@ namespace LIM.EntityServices
                 }
             }
 
+        }
+
+        public async Task<ColumnDefinitionCollectionResponse?> GetColumnInfo(string tableName)
+        {
+            var gc = GetGraphServiceClientApplication();
+
+            var selectedSite = await gc.Sites[SiteId].GetAsync();
+
+            var myList = await gc.Sites[selectedSite.Id].Lists[tableName].GetAsync();
+
+            var graphColumns = await gc.Sites[selectedSite.Id].Lists[tableName].Columns.GetAsync();
+
+            return graphColumns;
         }
 
         public async Task GetOrUpdateManager<T>(EntityManager<T> manager) where T : IEntity, new()
@@ -245,6 +298,23 @@ namespace LIM.EntityServices
             manager.DeleteAllExcept(serverSidePresentIds);
             lastSeenModifiedDateTime = myList.LastModifiedDateTime.Value;
             Debug.WriteLine("Loaded");
+        }
+
+
+        public async Task<ListItemCollectionResponse?> GetEntriesForTable(string tableName)
+        {
+            var gc = GetGraphServiceClientApplication();
+
+            var selectedSite = await gc.Sites[SiteId].GetAsync();
+
+            var myList = await gc.Sites[selectedSite.Id].Lists[tableName].GetAsync();
+
+            var graphItemInList = await gc.Sites[selectedSite.Id].Lists[tableName].Items.GetAsync((requestConfiguration) =>
+            {
+                requestConfiguration.QueryParameters.Expand = new string[] { "fields($select=*)" };
+            });
+           
+            return graphItemInList;
         }
 
         private GraphServiceClient GetGraphServiceClientApplication()

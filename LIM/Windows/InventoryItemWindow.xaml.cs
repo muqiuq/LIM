@@ -30,16 +30,30 @@ namespace LIM.Windows
 
         private bool MarkedForUpload = false;
 
+        private bool AbortClose = false;
+
         public EntityManager<InventoryItem> InventoryItems { get; }
+
+        public bool HasBeenClosed { get; private set; } = false;
 
         public InventoryItemWindow(InventoryItem inventoryItem, LimAppContext appContext)
         {
             InitializeComponent();
+            if(string.IsNullOrWhiteSpace(appContext.AppStateEngine.ActiveUser))
+            {
+                MessageBox.Show("Cannot edit item without selecting a user. Please scan/select a user first.", "Nope", MessageBoxButton.OK, MessageBoxImage.Error);
+                AbortClose = true;
+                Close();
+            }
             appContext.InventoryItems.GetChoices(ReflectionHelper.GetMsListColumnName<InventoryItem>(x => x.Type)).ForEach(x => typeChomboBox.Items.Add(x));
             appContext.InventoryItems.GetChoices(ReflectionHelper.GetMsListColumnName<InventoryItem>(x => x.Unit)).ForEach(x => quantityunitContentBox.Items.Add(x));
             InventoryItem = inventoryItem;
             this.appContext = appContext;
             InventoryItems = appContext.InventoryItems;
+            if(!inventoryItem.OriginalInventoryFromRemote.HasValue)
+            {
+                inventoryItem.OriginalInventoryFromRemote = inventoryItem.ActualInventory;
+            }
             productGrid.DataContext = inventoryItem;
             stockContentBox.Text = InventoryItem.ActualInventory.ToString();
             LastFocused = DateTime.Now;
@@ -69,6 +83,8 @@ namespace LIM.Windows
             Close();
         }
 
+        
+
         private void CommandBinding_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
             
@@ -85,6 +101,11 @@ namespace LIM.Windows
 
         public void AddOrRemove(decimal amount = 0)
         {
+            if (InventoryItem.ActualInventory + amount < 0)
+            {
+                MessageBox.Show("negative stock is not possible", "Nope", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             InventoryItem.ActualInventory += amount;
             UpdateStockContentBox();
         }
@@ -151,6 +172,8 @@ namespace LIM.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            HasBeenClosed = true;
+            if (AbortClose) return;
             if (!MarkedForUpload)
             {
                 var result = MessageBox.Show(this,

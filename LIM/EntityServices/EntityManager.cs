@@ -40,6 +40,11 @@ namespace LIM.EntityServices
             return Items.Where(i => i.Updated && i.Entity.Id != IEntity.NEW_ID_STR).Select(i => i.Entity).ToList();
         }
 
+        public List<T> GetEntriesThatRequireLogEntries()
+        {
+            return Items.Where(i => i.RequiresLogEntry).Select(i => i.Entity).ToList();
+        }
+
         public List<T> GetLocalyNewEntries()
         {
             return Items.Where(i => i.Updated && i.Entity.Id == IEntity.NEW_ID_STR).Select(i => i.Entity).ToList();
@@ -53,6 +58,14 @@ namespace LIM.EntityServices
                 NotifyChange(null);
             }
         }
+
+
+        public void SetRequiresLogEntry(T entity, bool value)
+        {
+            Items.Single(i => i.Entity.Equals(entity)).RequiresLogEntry = value;
+        }
+
+
 
         public bool TryLock(T entity)
         {
@@ -305,7 +318,6 @@ namespace LIM.EntityServices
         {
             return Items.Select(x => new KeyValuePair<string, T>(x.Entity.Id, x.Entity)).GetEnumerator();
         }
-
 
         #endregion
     }
