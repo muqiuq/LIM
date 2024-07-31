@@ -1,4 +1,6 @@
-﻿using LIM.Models;
+﻿using LIM.Helpers;
+using LIM.Models;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +14,8 @@ namespace LIM.Engines
         public LimAppContext AppContext { get; }
 
         public AppStateManager StateManager { get; }
+
+        public ILogger Logger = LoggerService.DefaultFactory.CreateLogger<AppLogicLinker>();    
 
         public AppLogicLinker(LimAppContext appContext)
         {
@@ -32,13 +36,15 @@ namespace LIM.Engines
                 var stateString = barcode.Split(":").Last().Trim();
                 if (Enum.TryParse(stateString, true, out AppState state))
                 {
-                     StateManager.State = state; 
+                     StateManager.State = state;
+                    Logger.LogDebug($"Change state to {stateString}");
                 }
             }
 
             else if (barcode.StartsWith("USER:"))
             {
                 var userString = barcode.Split(":", 2).Last().Trim();
+                Logger.LogInformation($"Active user set to {userString}");
                 StateManager.ActiveUser = userString;
             }
 

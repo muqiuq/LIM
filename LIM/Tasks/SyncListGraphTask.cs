@@ -1,9 +1,11 @@
 ﻿using LIM.Engines;
 using LIM.EntityServices;
+using LIM.EntityServices.Helpers;
 using LIM.Helpers;
 using LIM.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -30,6 +32,8 @@ namespace LIM.Tasks
         private bool isRunning = false;
 
         private DateTime nextRun;
+
+        private ILogger Logger = LoggerService.DefaultFactory.CreateLogger<SyncListGraphTask>();
 
         private bool UpdateColumnInfo { get; set; } = true;
 
@@ -77,9 +81,8 @@ namespace LIM.Tasks
                 {
                     throw ex;
                 }
-                Debug.WriteLine(ex);
-                //logger.LogError($"CleanUpTask {ex.Message}", ex);
-            }
+                Logger.LogError(ex, "Task Exception");
+    }
             isRunning = false;
         }
 
@@ -96,7 +99,7 @@ namespace LIM.Tasks
         {
             if(string.IsNullOrWhiteSpace(GraphService.SiteId))
             {
-                Debug.WriteLine("Missing Site Id. Not syncing");
+                Logger.LogError("Missing Site Id. Not syncing");
                 return;
             }
             if (InventoryItemEntityManger.GetLocalyChangedEntries().Count > 0)
@@ -113,11 +116,11 @@ namespace LIM.Tasks
 
             var taskUpload = GraphService.UploadLocalChanges(InventoryItemEntityManger);
             taskUpload.Wait();
-            Debug.WriteLine($"Uploaded {taskUpload.Result}");
+            if(taskUpload.Result > 0) Logger.LogInformation($"Uploaded {taskUpload.Result}");
 
             var taskUpload2 = GraphService.UploadNewItems(InventoryItemEntityManger);
             taskUpload2.Wait();
-            Debug.WriteLine($"Uploaded {taskUpload2.Result}");
+            if (taskUpload2.Result > 0) Logger.LogInformation($"Created {taskUpload2.Result}");
 
             var taskLogEntries = CalculateChangesAndCreateLogEntries();
             taskLogEntries.Wait();
@@ -125,8 +128,8 @@ namespace LIM.Tasks
             var taskSync = GraphService.GetOrUpdateManager(InventoryItemEntityManger);
             taskSync.Wait();
             if(InventoryItemEntityManger.Changed) InventoryItemEntityManger.Save();
-            Debug.WriteLine("Sync Task runned");
             LastSuccessfulUpdate = DateTime.Now;
+            Logger.LogInformation($"Microsoft Graph Sharepoint List Sync Task finished successfully @ {LastSuccessfulUpdate}");
         }
 
         private async Task CalculateChangesAndCreateLogEntries()
@@ -137,6 +140,7 @@ namespace LIM.Tasks
             {
                 if (!changedItem.OriginalInventoryFromRemote.HasValue || 
                     changedItem.ActualInventory == changedItem.OriginalInventoryFromRemote) continue;
+                if (string.IsNullOrEmpty(changedItem.Id) || changedItem.Id == IEntity.NEW_ID_STR) continue;
                 var inventoryLogItem = new InventoryLogItem()
                 {
                     StockChange = changedItem.ActualInventory - changedItem.OriginalInventoryFromRemote.Value,
@@ -146,7 +150,7 @@ namespace LIM.Tasks
                     Username = AppStateManager.ActiveUser
                 };
                 var taskCreateLogEntry = await GraphService.CreateNewItem(Settings.LogListName, inventoryLogItem);
-                Debug.WriteLine(taskCreateLogEntry ? "Created log entry" : "Failed to craete log entry");
+                if (!taskCreateLogEntry) Logger.LogError($"Failed to craete log entry for {changedItem.Id} {changedItem.Description}");
                 InventoryItemEntityManger.SetRequiresLogEntry(changedItem, false);
             }
         }

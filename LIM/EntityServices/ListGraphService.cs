@@ -1,8 +1,10 @@
 ﻿using Azure.Identity;
+using LIM.BarcodeScanner;
 using LIM.EntityServices.Helpers;
 using LIM.Helpers;
 using LIM.Models;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System;
@@ -21,6 +23,8 @@ namespace LIM.EntityServices
     public class ListGraphService
     {
         DateTimeOffset lastSeenModifiedDateTime = DateTimeOffset.MinValue;
+
+        private ILogger Logger = LoggerService.DefaultFactory.CreateLogger<ListGraphService>();
 
         public ListGraphService(IConfigurationRoot configuration, LimSettings userSettings)
         {
@@ -199,7 +203,7 @@ namespace LIM.EntityServices
 
             if (myList.LastModifiedDateTime != null && lastSeenModifiedDateTime >= myList.LastModifiedDateTime)
             {
-                Debug.WriteLine("No change. No Update (columns)");
+                Logger.LogDebug("No change. No Update (columns)");
                 return;
             }
 
@@ -238,7 +242,7 @@ namespace LIM.EntityServices
 
             if (myList.LastModifiedDateTime != null && lastSeenModifiedDateTime >= myList.LastModifiedDateTime)
             {
-                Debug.WriteLine("No change. No Update");
+                Logger.LogDebug("No change. No Update");
                 return;
             }
 
@@ -297,7 +301,7 @@ namespace LIM.EntityServices
             }
             manager.DeleteAllExcept(serverSidePresentIds);
             lastSeenModifiedDateTime = myList.LastModifiedDateTime.Value;
-            Debug.WriteLine("Loaded");
+            Logger.LogInformation($"Loaded entries for {manager.TableName}");
         }
 
 

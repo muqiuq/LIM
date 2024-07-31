@@ -1,4 +1,5 @@
 ﻿using LIM.Helpers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Graph.Models.ExternalConnectors;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace LIM.BarcodeScanner
 
         public delegate void OnBarcodeLineReceivedDelegate(string barcode);
         public event OnBarcodeLineReceivedDelegate OnBarcodeLineReceived;
+
+        private ILogger Logger = LoggerService.DefaultFactory.CreateLogger<BarcodeScannerService>();
 
         public BarcodeScannerService(LimSettings limSettings) {
             LimSettings = limSettings;
@@ -35,7 +38,7 @@ namespace LIM.BarcodeScanner
             }
             catch (FileNotFoundException ex)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.LogError(ex, "Serial port open exception");
             }
         }
 
@@ -56,7 +59,7 @@ namespace LIM.BarcodeScanner
 
         private void ExecuteBarcodeAction(string part)
         {
-            Debug.WriteLine(part);
+            Logger.LogDebug($"Barcode scanner input: {part}");
             OnBarcodeLineReceived?.Invoke(part);
         }
 
