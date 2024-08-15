@@ -6,20 +6,38 @@
         xmlns:local="clr-namespace:LIM"
         xmlns:engines="clr-namespace:LIM.Engines"
         mc:Ignorable="d"
-        Title="LIM" Height="289" Width="400" ResizeMode="NoResize">
-    <Grid x:Name="MainGrid">
-        <Label Content="User:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" FontSize="20" MouseDoubleClick="Label_MouseDoubleClick"/>
-        <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,52,0,0" VerticalAlignment="Top" FontSize="20"/>
-        <Button Content="Inventory" HorizontalAlignment="Left" Margin="10,114,0,0" VerticalAlignment="Top" Click="InventoryList_Click" Height="42" Width="371" FontSize="20"/>
-        <Button Content="Settings" HorizontalAlignment="Left" Margin="10,167,0,0" VerticalAlignment="Top" Click="Button_Click_Settings"/>
-        <ComboBox HorizontalAlignment="Left" Margin="123,54,0,0" VerticalAlignment="Top" Width="247"
+        Title="LIM" Height="373" Width="400" ResizeMode="NoResize">
+    <Window.Resources>
+        <RoutedCommand x:Key="InventoryOpenShortcut"/>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="{StaticResource InventoryOpenShortcut}" Executed="InventoryOpenShortcut_Event"></CommandBinding>
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Key="I" Modifiers="Control" Command="{StaticResource InventoryOpenShortcut}"></KeyBinding>
+    </Window.InputBindings>
+    <Grid x:Name="MainGrid" Margin="0,0,0,0">
+        <Label Content="User:" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" FontSize="20" MouseDoubleClick="Label_MouseDoubleClick"/>
+        <Label Content="Mode:" HorizontalAlignment="Left" Margin="10,124,0,0" VerticalAlignment="Top" FontSize="20"/>
+        <Button Content="Search in Inventory (Ctrl + I)" HorizontalAlignment="Left" Margin="10,187,0,0" VerticalAlignment="Top" Click="InventoryList_Click" Height="42" Width="371" FontSize="20"/>
+        <Button Content="Settings" HorizontalAlignment="Left" Margin="10,239,0,0" VerticalAlignment="Top" Click="Button_Click_Settings"/>
+        <ComboBox HorizontalAlignment="Left" Margin="123,126,0,0" VerticalAlignment="Top" Width="247"
                   ItemsSource="{Binding Path=AppStates}"
                   SelectedItem="{Binding Path=State, Mode=TwoWay}" FontSize="20"/>
-        <Label x:Name="UserLabel" Content="{Binding Path=ActiveUser, Mode=TwoWay}" HorizontalAlignment="Left" Margin="123,10,0,0" VerticalAlignment="Top" Width="247" FontSize="20" Height="36"/>
-        <Label Content="Sync Status: " HorizontalAlignment="Left" Margin="10,195,0,0" VerticalAlignment="Top" Width="93"/>
-        <Label x:Name="SyncStatusLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,195,0,0" VerticalAlignment="Top" Width="274"/>
-        <Label Content="Barcode Scanner: " HorizontalAlignment="Left" Margin="10,221,0,0" VerticalAlignment="Top" Width="101"/>
-        <Label x:Name="BarcodeScannerLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,221,0,0" VerticalAlignment="Top" Width="274"/>
-        <Button x:Name="ReconnectButton" Content="Reconnect" HorizontalAlignment="Left" Margin="319,224,0,0" VerticalAlignment="Top" Visibility="Hidden" Click="Button_Click_Reconnect" />
+        <Label x:Name="UserLabel" Content="{Binding Path=ActiveUser, Mode=TwoWay}" HorizontalAlignment="Left" Margin="123,82,0,0" VerticalAlignment="Top" Width="247" FontSize="20" Height="36"/>
+        <Label Content="Sync Status: " HorizontalAlignment="Left" Margin="10,267,0,0" VerticalAlignment="Top" Width="93"/>
+        <Label x:Name="SyncStatusLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,267,0,0" VerticalAlignment="Top" Width="274"/>
+        <Label Content="Barcode Scanner: " HorizontalAlignment="Left" Margin="10,293,0,0" VerticalAlignment="Top" Width="101"/>
+        <Label x:Name="BarcodeScannerLabel" Content="Loading..." HorizontalAlignment="Left" Margin="116,293,0,0" VerticalAlignment="Top" Width="274"/>
+        <Button x:Name="ReconnectButton" Content="Reconnect" HorizontalAlignment="Left" Margin="319,296,0,0" VerticalAlignment="Top" Visibility="Visible" Click="Button_Click_Reconnect" />
+        <Label Margin="10,10,10,0" VerticalAlignment="Top" Height="67" Width="380" FontSize="14">
+            <Label.Content>
+                <TextBlock TextWrapping="Wrap">
+                    1. use barcode scanner to select user and mode <LineBreak/>
+                    2. scan item barcode <LineBreak/>
+                    OR search inventory
+                </TextBlock>
+            </Label.Content>
+        </Label>
     </Grid>
 </Window>

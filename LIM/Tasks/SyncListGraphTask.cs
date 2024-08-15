@@ -124,7 +124,7 @@ namespace LIM.Tasks
 
             var taskLogEntries = CalculateChangesAndCreateLogEntries();
             taskLogEntries.Wait();
-            if (taskLogEntries.Result > 0) Logger.LogInformation($"Created {taskLogEntries.Result} log entries");
+            if (taskLogEntries.Result > 0) Logger.LogInformation($"Created {taskLogEntries  .Result} log entries");
 
             var taskSync = GraphService.GetOrUpdateManager(InventoryItemEntityManger);
             taskSync.Wait();

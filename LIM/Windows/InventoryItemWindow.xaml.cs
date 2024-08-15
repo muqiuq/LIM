@@ -87,11 +87,18 @@ namespace LIM.Windows
             Close();
         }
 
-        
+        DateTime? lastCloseHit = null;
 
         private void CommandBinding_OnExecuted(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            if (lastCloseHit == null || (DateTime.Now - lastCloseHit) > TimeSpan.FromSeconds(1))
+            {
+                lastCloseHit = DateTime.Now;
+            }
+            else
+            {
+                Close();
+            }
         }
 
         private void Button_Print_Click(object sender, RoutedEventArgs e)
@@ -105,6 +112,7 @@ namespace LIM.Windows
 
         public void AddOrRemove(decimal amount = 0)
         {
+            if(AbortClose) return;
             if (InventoryItem.ActualInventory + amount < 0)
             {
                 MessageBox.Show("negative stock is not possible", "Nope", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -212,6 +220,32 @@ namespace LIM.Windows
         {
             if (eanContentBox.SelectedItem == null) return;
             ClipboardService.SetText(eanContentBox.SelectedItem.ToString());
+        }
+
+        internal void AddBarcodes(string[]? barcodesToAppend)
+        {
+            if (AbortClose) return;
+            if (barcodesToAppend == null) return;
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(() => AddBarcodes(barcodesToAppend));
+                return;
+            }
+            foreach (var barcode in barcodesToAppend)
+            {
+                InventoryItem.EANs.Add(barcode);
+            }
+            eanContentBox.GetBindingExpression(ListBox.ItemsSourceProperty).UpdateTarget();
+        }
+
+        private void PlusShortcut_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            AddOrRemove(1);
+        }
+
+        private void MinusShortcut_OnExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            AddOrRemove(-1);
         }
     }
 }

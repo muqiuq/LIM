@@ -11,6 +11,8 @@
         <RoutedCommand x:Key="SaveShortcut"/>
         <RoutedCommand x:Key="PrintShortcut"/>
         <RoutedCommand x:Key="CloseShortcut"/>
+        <RoutedCommand x:Key="PlusShortcut"/>
+        <RoutedCommand x:Key="MinusShortcut"/>
         <Style TargetType="TextBox">
             <Setter Property="FontSize" Value="16"/>
         </Style>
@@ -20,11 +22,15 @@
         <CommandBinding Command="{StaticResource SaveShortcut}" Executed="Button_Save_Click"></CommandBinding>
         <CommandBinding Command="{StaticResource PrintShortcut}" Executed="Button_Print_Click"></CommandBinding>
         <CommandBinding Command="{StaticResource CloseShortcut}" Executed="CommandBinding_OnExecuted"></CommandBinding>
+        <CommandBinding Command="{StaticResource PlusShortcut}" Executed="PlusShortcut_OnExecuted"></CommandBinding>
+        <CommandBinding Command="{StaticResource MinusShortcut}" Executed="MinusShortcut_OnExecuted"></CommandBinding>
     </Window.CommandBindings>
 
     <Window.InputBindings>
         <KeyBinding Key="S" Modifiers="Control" Command="{StaticResource SaveShortcut}"></KeyBinding>
         <KeyBinding Key="Q" Modifiers="Control" Command="{StaticResource CloseShortcut}"></KeyBinding>
+        <KeyBinding Key="Add" Command="{StaticResource PlusShortcut}"></KeyBinding>
+        <KeyBinding Key="Subtract" Command="{StaticResource MinusShortcut}"></KeyBinding>
         <KeyBinding Key="Escape" Command="{StaticResource CloseShortcut}"></KeyBinding>
         <KeyBinding Key="P" Modifiers="Control" Command="{StaticResource PrintShortcut}"></KeyBinding>
     </Window.InputBindings>

@@ -10,24 +10,32 @@
 
     <Window.Resources>
         <RoutedCommand x:Key="SearchShortcut"/>
+        <RoutedCommand x:Key="CloseShortcut"/>
+        <RoutedCommand x:Key="NewShortcut"/>
     </Window.Resources>
 
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource SearchShortcut}" Executed="CommandBinding_Search"></CommandBinding>
+        <CommandBinding Command="{StaticResource CloseShortcut}" Executed="CommandBinding_Close"></CommandBinding>
+        <CommandBinding Command="{StaticResource NewShortcut}" Executed="CommandBinding_New"></CommandBinding>
     </Window.CommandBindings>
 
     <Window.InputBindings>
         <KeyBinding Key="F" Modifiers="Control" Command="{StaticResource SearchShortcut}"></KeyBinding>
+        <KeyBinding Key="N" Modifiers="Control" Command="{StaticResource NewShortcut}"></KeyBinding>
+        <KeyBinding Key="Esc" Command="{StaticResource CloseShortcut}"></KeyBinding>
     </Window.InputBindings>
 
     <DockPanel>
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition x:Name="FirstRowDefinition" Height="30"/>
                 <RowDefinition Height="30"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <TextBox Name="searchTexBox" HorizontalAlignment="Stretch" Grid.Row="0" Margin="0,0,0,0" TextWrapping="Wrap" VerticalAlignment="Stretch" TextChanged="SearchBox_TextChanged" FontSize="18" KeyDown="searchTexBox_KeyDown" />
-            <DataGrid Name="inventoryItemDataGrid" HorizontalAlignment="Stretch" Margin="0,0,0,30" Grid.Row="1" VerticalAlignment="Stretch" AutoGenerateColumns="False" MouseDoubleClick="inventoryItemDataGrid_MouseDoubleClick" IsReadOnly="True" KeyDown="inventoryItemDataGrid_KeyDown">
+            <Label Name="StatusLabelBottom" Content="Search item:" Margin="0,0,0,0" HorizontalContentAlignment="Stretch" Grid.Row="0" VerticalAlignment="Stretch" FontSize="16" FontFamily="Courier New" Foreground="Black"/>
+            <TextBox Name="searchTexBox" HorizontalAlignment="Stretch" Grid.Row="1" Margin="0,0,0,0" TextWrapping="Wrap" VerticalAlignment="Stretch" TextChanged="SearchBox_TextChanged" FontSize="18" KeyDown="searchTexBox_KeyDown" />
+            <DataGrid Name="inventoryItemDataGrid" HorizontalAlignment="Stretch" Margin="0,0,0,30" Grid.Row="2" VerticalAlignment="Stretch" AutoGenerateColumns="False" MouseDoubleClick="inventoryItemDataGrid_MouseDoubleClick" IsReadOnly="True" KeyDown="inventoryItemDataGrid_KeyDown" PreviewKeyDown="inventoryItemDataGrid_PreviewKeyDown">
                 <DataGrid.Columns>
                     <DataGridTextColumn IsReadOnly="True" Width="60" Header="Id" Binding="{Binding Id}" FontSize="14"></DataGridTextColumn>
                     <DataGridTextColumn IsReadOnly="True" MinWidth="420" Header="Description" Binding="{Binding Description}" FontSize="14"></DataGridTextColumn>
@@ -36,8 +44,7 @@
                     <DataGridTextColumn IsReadOnly="True" Header="Price" Binding="{Binding Price}" FontSize="14"></DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
-            <Label Name="StatusLabelBottom" Content="" Margin="0,0,121,0" Grid.Row="1" VerticalAlignment="Bottom" FontFamily="Courier New"/>
-            <Button Content="New" HorizontalAlignment="Right" Margin="0,0,4,4" Grid.Row="1" VerticalAlignment="Bottom" Width="105" Click="Button_Click_New"/>
+            <Button Content="New (Ctrl + N)" HorizontalAlignment="Right" Margin="0,0,4,4" Grid.Row="2" VerticalAlignment="Bottom" Width="133" Click="Button_Click_New"/>
         </Grid>
     </DockPanel>
 </Window>

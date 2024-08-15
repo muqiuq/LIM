@@ -28,12 +28,12 @@ namespace LIM.Windows.Helpers
             }
         }
 
-        public void OpenOrFocusInventoryItemWindow(InventoryItem item, LimAppContext appContext, int addOrRemove = 0, bool closeOthers = false) 
+        public void OpenOrFocusInventoryItemWindow(InventoryItem item, LimAppContext appContext, int addOrRemove = 0, bool closeOthers = false, string[]? barcodesToAppend = null) 
         {
             if (!Application.Current.Dispatcher.CheckAccess())
             {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
-                    OpenOrFocusInventoryItemWindow(item, appContext, addOrRemove, closeOthers);
+                    OpenOrFocusInventoryItemWindow(item, appContext, addOrRemove, closeOthers, barcodesToAppend);
                 });
                 return;
             }
@@ -48,6 +48,7 @@ namespace LIM.Windows.Helpers
                 if(!InventoryItemToWindow.ContainsKey(item) )
                 {
                     var wind = new InventoryItemWindow(item, appContext);
+                    wind.AddBarcodes(barcodesToAppend);
                     InventoryItemToWindow.Add(item, wind);
                     if(!wind.HasBeenClosed) wind.Show();
                     if (addOrRemove != 0) wind.AddOrRemove(addOrRemove);
@@ -55,6 +56,7 @@ namespace LIM.Windows.Helpers
                 else
                 {
                     var wind = InventoryItemToWindow[item];
+                    wind.AddBarcodes(barcodesToAppend);
                     wind.Activate();
                     if (addOrRemove != 0) wind.AddOrRemove(addOrRemove);
                 }
@@ -91,6 +93,18 @@ namespace LIM.Windows.Helpers
                     .OrderByDescending(x => x.Value.LastFocused).Select(x => x.Value)
                     .FirstOrDefault()?.CloseAndUpload();
             }
+        }
+
+        internal void OpenSelectInventoryItemWindow(LimAppContext appContext, string barcode)
+        {
+            if (!Application.Current.Dispatcher.CheckAccess())
+            {
+                Application.Current.Dispatcher.Invoke((Action)delegate { OpenSelectInventoryItemWindow(appContext, barcode); });
+                return;
+            }
+            var barcodesToAppend = new string[] { barcode };
+            var inventoryListItemWindow = new InventoryItemListWindow(appContext, closeAfterSelect: true, barcodesToAppend);
+            inventoryListItemWindow.Show();
         }
     }
 }

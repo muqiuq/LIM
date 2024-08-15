@@ -62,6 +62,7 @@ namespace LIM.EntityServices
 
         internal bool IsUpdated(InventoryItem inventoryItem)
         {
+            if (!Items.Any(i => i.Entity.Equals(inventoryItem))) return false;
             return Items.Single(i => i.Entity.Equals(inventoryItem)).Updated;
         }
 

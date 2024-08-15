@@ -161,7 +161,7 @@ namespace LIM.EntityServices
 
                         if (graphItemInList.Fields.AdditionalData.TryGetValue(attribute.Name, out var graphFieldValue))
                         {
-                            if (!property.GetValue(item).Equals(graphFieldValue))
+                            if (!graphFieldValue.Equals(property.GetValue(item)))
                             {
                                 fieldsToUpdate[attribute.Name] = NormalizeValue(property.GetValue(item));
                             }

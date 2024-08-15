@@ -65,11 +65,18 @@ namespace LIM.Engines
                 if (StateManager.State == AppState.CheckIn) amount = 1;
                 if (StateManager.State == AppState.CheckOut) amount = -1;
 
-                foreach (var inventoryItem in inventoryItems)
+                if (inventoryItems.Any())
                 {
-                    AppContext.WindowManager.OpenOrFocusInventoryItemWindow(inventoryItem, AppContext, 
-                        addOrRemove: amount, 
-                        closeOthers: StateManager.State is AppState.CheckIn or AppState.CheckOut);
+                    foreach (var inventoryItem in inventoryItems)
+                    {
+                        AppContext.WindowManager.OpenOrFocusInventoryItemWindow(inventoryItem, AppContext,
+                            addOrRemove: amount,
+                            closeOthers: StateManager.State is AppState.CheckIn or AppState.CheckOut);
+                    }
+                }
+                else
+                {
+                    AppContext.WindowManager.OpenSelectInventoryItemWindow(AppContext, barcode);
                 }
             }
         }

@@ -3,6 +3,7 @@ using LIM.Models;
 using LIM.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
+using System.Reflection;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,6 +35,10 @@ namespace LIM
             Timer.Tick += Timer_Tick;
             Timer.Interval = new TimeSpan(0, 0, 1);
             Timer.Start();
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            if(version != null)
+                Title += " V" + version;
+
         }
 
         private void Timer_Tick(object? sender, EventArgs e)
@@ -95,6 +100,11 @@ namespace LIM
         {
             var barcodeWindow = new BarcodeScanWindow(GlobalState.LimAppContext, true);
             barcodeWindow.Show();
+        }
+
+        private void InventoryOpenShortcut_Event(object sender, ExecutedRoutedEventArgs e)
+        {
+            InventoryList_Click(null, null);
         }
     }
 }
